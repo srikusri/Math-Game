@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Treasure Hunt 🏴‍☠️ — CBSE Grades 5–8</title>
+<meta name="description" content="A fun pirate-themed treasure hunt math game for CBSE Grades 5 to 8. Solve dynamic questions, unlock islands, and open treasure chests!">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E🏴‍☠️%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css?v=1.4">
+</head>
+<body>
+
+<!-- ══════════════ TOP BAR ══════════════ -->
+<header id="topbar" class="hidden">
+  <button id="btn-home" class="icon-btn" title="Back to Home">🏠</button>
+  <div id="topbar-title">🏴‍☠️ Math Treasure Hunt</div>
+  <div class="topbar-right">
+    <div id="coin-count" class="coin-chip">🪙 <span id="coin-value">0</span></div>
+    <button id="btn-doodle" class="icon-btn" title="Captain's Sketch Pad">✏️</button>
+    <button id="btn-sound" class="icon-btn" title="Sound on/off">🔊</button>
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- ══════════════ HOME SCREEN ══════════════ -->
+  <section id="screen-home" class="screen">
+    <div class="home-hero">
+      <div id="home-art"></div>
+      <h1 class="game-title">Math Treasure Hunt</h1>
+      <p class="game-sub">Ahoy, matey! Answer CBSE math questions, sail the seas,<br>and dig up the golden treasure! ⚓💎</p>
+    </div>
+    <h2 class="choose-title">Choose your ship (Grade)</h2>
+    <div id="grade-cards" class="grade-grid"></div>
+    <div class="home-footer">
+      <button id="btn-howto" class="btn btn-ghost">❓ How to Play</button>
+      <button id="btn-reset" class="btn btn-ghost">🗑️ Reset Progress</button>
+    </div>
+  </section>
+
+  <!-- ══════════════ MAP SCREEN ══════════════ -->
+  <section id="screen-map" class="screen hidden">
+    <div class="map-header">
+      <h2 id="map-title">Treasure Map</h2>
+      <p id="map-sub">Sail island to island. Each one guards a piece of the treasure!</p>
+    </div>
+    <div id="map-wrap"></div>
+  </section>
+
+  <!-- ══════════════ QUIZ SCREEN ══════════════ -->
+  <section id="screen-quiz" class="screen hidden">
+    <div class="quiz-top">
+      <div class="quiz-topic-chip" id="quiz-topic">Topic</div>
+      <div class="chest-progress">
+        <span id="chest-art"></span>
+        <span id="chest-count">0 / 5</span>
+      </div>
+    </div>
+    <div class="progress-track"><div id="progress-fill"></div></div>
+
+    <div class="quiz-card">
+      <div id="q-art" class="q-art"></div>
+      <div id="q-text" class="q-text">Loading…</div>
+      <div id="q-choices" class="q-choices hidden"></div>
+      <div id="q-input-row" class="q-input-row">
+        <input id="q-input" type="text" autocomplete="off" placeholder="Type your answer…" spellcheck="false">
+        <button id="btn-submit" class="btn btn-gold">Check ⚔️</button>
+      </div>
+      <div id="q-feedback" class="q-feedback" role="status"></div>
+      <div class="quiz-actions">
+        <button id="btn-hint" class="btn btn-ghost btn-sm">💡 Hint</button>
+        <button id="btn-reveal" class="btn btn-ghost btn-sm hidden">🔓 Show Answer</button>
+        <button id="btn-quiz-doodle" class="btn btn-ghost btn-sm">✏️ Sketch Pad</button>
+        <button id="btn-quiz-quit" class="btn btn-ghost btn-sm">🗺️ Map</button>
+        <button id="btn-next" class="btn btn-gold hidden">Next ➡️</button>
+      </div>
+    </div>
+
+    <div class="quiz-buddy">
+      <span id="buddy-art"></span>
+      <div id="buddy-say" class="bubble">Let's go!</div>
+    </div>
+  </section>
+
+  <!-- ══════════════ VICTORY SCREEN ══════════════ -->
+  <section id="screen-victory" class="screen hidden">
+    <div id="victory-art"></div>
+    <h1 class="victory-title">TREASURE FOUND! 🏆</h1>
+    <p id="victory-text" class="game-sub"></p>
+    <div id="victory-coins" class="victory-coins">🪙 0</div>
+    <div class="home-footer">
+      <button id="btn-victory-map" class="btn btn-gold">🗺️ Back to Map</button>
+      <button id="btn-victory-home" class="btn btn-ghost">🏠 Choose Grade</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- ══════════════ CHEST OPENED OVERLAY ══════════════ -->
+<div id="chest-overlay" class="overlay hidden">
+  <div class="overlay-card">
+    <div id="chest-overlay-art"></div>
+    <h2 id="chest-overlay-title">Island Cleared!</h2>
+    <p id="chest-overlay-text"></p>
+    <button id="btn-chest-ok" class="btn btn-gold">Collect & Continue 💰</button>
+  </div>
+</div>
+
+<!-- ══════════════ HOW TO PLAY OVERLAY ══════════════ -->
+<div id="howto-overlay" class="overlay hidden">
+  <div class="overlay-card howto">
+    <h2>How to Play ⚓</h2>
+    <ol>
+      <li>🎂 Pick your grade (5, 6, 7 or 8) to set sail.</li>
+      <li>🏝️ Each island on the map is one CBSE math topic.</li>
+      <li>❓ Answer 5 questions per island — every question is freshly generated, so they never repeat!</li>
+      <li>💡 Stuck? Use a Hint, sketch rough work in the ✏️ Sketch Pad, or draw shapes to help you think.</li>
+      <li>🪙 First-try answers earn 10 coins, second tries earn 5. Streaks earn bonuses!</li>
+      <li>💎 Clear all 6 islands to open the Grand Treasure chest!</li>
+    </ol>
+    <button id="btn-howto-ok" class="btn btn-gold">Got it, Captain! ⚓</button>
+  </div>
+</div>
+
+<!-- ══════════════ SKETCH PAD (SVG DOODLE) ══════════════ -->
+<div id="doodle-modal" class="overlay hidden">
+  <div class="doodle-card">
+    <div class="doodle-bar">
+      <strong>✏️ Captain's Sketch Pad</strong>
+      <button id="doodle-close" class="icon-btn" title="Close">✖</button>
+    </div>
+    <div class="doodle-tools">
+      <div class="tool-group" id="doodle-tools-btns">
+        <button class="tool active" data-tool="pen"   title="Pen">🖊️ Pen</button>
+        <button class="tool" data-tool="eraser" title="Eraser">🧽 Eraser</button>
+        <button class="tool" data-tool="line"   title="Line">📏 Line</button>
+        <button class="tool" data-tool="rect"   title="Rectangle">▭ Box</button>
+        <button class="tool" data-tool="circle" title="Circle">⚪ Circle</button>
+        <button class="tool" data-tool="stamp"  title="Stickers">💎 Sticker</button>
+      </div>
+      <div class="tool-group" id="doodle-colors">
+        <button class="swatch active" data-color="#1f2a44" style="background:#1f2a44"></button>
+        <button class="swatch" data-color="#e63946" style="background:#e63946"></button>
+        <button class="swatch" data-color="#2a9d8f" style="background:#2a9d8f"></button>
+        <button class="swatch" data-color="#457b9d" style="background:#457b9d"></button>
+        <button class="swatch" data-color="#f4a261" style="background:#f4a261"></button>
+        <button class="swatch" data-color="#ffb703" style="background:#ffb703"></button>
+        <button class="swatch" data-color="#8e44ad" style="background:#8e44ad"></button>
+      </div>
+      <div class="tool-group">
+        <label class="width-label"><span class="width-text">Thickness</span>
+          <input id="doodle-width" type="range" min="2" max="16" value="4">
+        </label>
+        <button id="doodle-undo" class="btn btn-ghost btn-sm">↩️ Undo</button>
+        <button id="doodle-clear" class="btn btn-ghost btn-sm">🗑️ Clear</button>
+        <button id="doodle-save" class="btn btn-ghost btn-sm">💾 Save SVG</button>
+      </div>
+    </div>
+    <svg id="doodle-canvas" viewBox="0 0 800 480" preserveAspectRatio="xMidYMid meet">
+      <rect x="0" y="0" width="800" height="480" fill="#fffdf5"></rect>
+      <g id="doodle-grid"></g>
+      <g id="doodle-ink"></g>
+    </svg>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="js/rng.js?v=1.4"></script>
+<script src="js/art.js?v=1.5"></script>
+<script src="js/questions.js?v=1.4"></script>
+<script src="js/doodle.js?v=1.4"></script>
+<script src="js/game.js?v=1.6"></script>
+</body>
+</html>
