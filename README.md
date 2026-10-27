@@ -1,4 +1,4 @@
-# 🏴‍☠️ Math Treasure Hunt — CBSE Grades 5–8
+# 🏴‍☠️ Math Treasure Hunt
 
 A fun pirate-themed **math game** that teaches CBSE Grade 5–8 topics through a
 treasure hunt across the seven seas. Kids pick their grade, sail from island to
