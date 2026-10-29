@@ -5,6 +5,12 @@
    The game never shows the same question text twice.
    ═══════════════════════════════════════════════════════════ */
 
+/* Node (unit-test) support: pull in rng + art when run outside the browser */
+if (typeof module !== 'undefined' && module.exports) {
+  if (typeof R === 'undefined') Object.assign(globalThis, require('./rng.js'));
+  if (typeof ART === 'undefined') globalThis.ART = require('./art.js');
+}
+
 /* ───────────────── GRADE 5 ───────────────── */
 
 function g5_numbers(lv) {
@@ -21,14 +27,14 @@ function g5_numbers(lv) {
     return { q: `Which number is GREATER?`, a: inFormat(Math.max(a, b)), choices: [inFormat(a), inFormat(b)].sort(),
       hint: `Compare digit by digit from the left, starting with the ten-thousands place.` };
   }
-  // place value of a digit
+  // place value of a digit (digits[0] is the LEFTMOST = ten-thousands)
   const digits = R.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 5);
   const n = +digits.join('');
   const pos = R.int(0, 4);
-  const places = ['ones', 'tens', 'hundreds', 'thousands', 'ten thousands'];
-  const ans = digits[pos] * Math.pow(10, pos);
+  const places = ['ten thousands', 'thousands', 'hundreds', 'tens', 'ones'];
+  const ans = digits[pos] * Math.pow(10, 4 - pos);
   return { q: `In the number ${inFormat(n)}, what is the place value of the digit ${digits[pos]}?`,
-    a: String(ans), hint: `It sits in the ${places[pos]} place. Place value = digit × place.` };
+    a: String(ans), hint: `It sits in the ${places[pos]} place. Place value = digit × ${Math.pow(10, 4 - pos)}.` };
 }
 
 function g5_muldiv(lv) {
@@ -84,9 +90,9 @@ function g5_decimals(lv) {
     return { q: `A chest holds ${a} kg of gold. The crew ${plus ? 'adds' : 'takes away'} ${b} kg. How many kg of gold are in the chest now? (just the number)`,
       a: String(parseFloat(ans)), hint: `Line up the decimal points, then ${plus ? 'add' : 'subtract'} like whole numbers.` };
   }
-  if (v === 1) { // ×10 / ×100
-    const a = (R.int(11, 999) / 10).toFixed(1), k = R.pick([10, 100]);
-    return { q: `What is ${a} × ${k}? (just the number)`, a: String(parseFloat(a) * k),
+  if (v === 1) { // ×10 / ×100 (integer math avoids float noise like 1230.0000000000002)
+    const ai = R.int(11, 999), k = R.pick([10, 100]);
+    return { q: `What is ${(ai / 10).toFixed(1)} × ${k}? (just the number)`, a: String(ai * k / 10),
       hint: `Multiplying by 10 moves the decimal point 1 step right; by 100, 2 steps right.` };
   }
   // compare decimals (MCQ)
@@ -229,7 +235,10 @@ function g6_ratio(lv) {
       a: `${a / g}:${b / g}`, hint: `Divide both parts by their HCF (${g}).` };
   }
   if (v === 1) { // share in ratio
-    const p1 = R.int(1, 5), p2 = R.int(1, 5), k = R.int(2, 9);
+    const p1 = R.int(1, 5);
+    let p2 = R.int(1, 5);
+    while (p2 === p1) p2 = R.int(1, 5);
+    const k = R.int(2, 9);
     const total = (p1 + p2) * k;
     return { q: `${total} gold coins are divided between two pirates in the ratio ${p1} : ${p2}. How many coins does the pirate with the LARGER share get? (just the number)`,
       a: String(Math.max(p1, p2) * k), hint: `Total parts = ${p1} + ${p2} = ${p1 + p2}. One part = ${total} ÷ ${p1 + p2} = ${k} coins.` };
@@ -327,17 +336,18 @@ function g7_percent(lv) {
     return { q: `A chest has ${n} coins. The crew pays ${p}% of them as harbour tax. How many coins is that? (just the number)`,
       a: String(n * p / 100), hint: `${p}% means ${p}/100. So compute ${p}/100 × ${n}. (Tip: 25% = ¼, 50% = ½, 75% = ¾.)` };
   }
-  if (v === 1) { // what percent
+  if (v === 1) { // what percent (whole chosen so the head-count is a whole number)
+    const need = { 10: 10, 20: 5, 25: 4, 40: 5, 50: 2, 75: 4 };
     const p = R.pick([10, 20, 25, 40, 50, 75]);
-    const whole = p === 40 ? 20 : R.pick([20, 40, 50, 80, 100, 200]);
+    const whole = R.multipleOf(need[p], 20, 200);
     const part = whole * p / 100;
     return { q: `In a class of ${whole} pirates-in-training, ${part} can swim. What PERCENT can swim? (just the number)`,
       a: String(p), hint: `Percent = (part ÷ whole) × 100 = ${part}/${whole} × 100.` };
   }
-  // increase/decrease
-  const n = R.multipleOf(10, 100, 800), p = R.pick([10, 20, 25, 50]);
+  // increase/decrease (n divisible by 100 keeps every percent exact)
+  const n = R.multipleOf(100, 100, 800), p = R.pick([10, 20, 25, 50]);
   const up = R.chance(0.5);
-  return { q: `The price of a treasure map rose from ₹${n} by ${p}%. What is the NEW price? (just the number, in ₹)`,
+  return { q: `The price of a treasure map ${up ? 'rose' : 'fell'} from ₹${n} by ${p}%. What is the NEW price? (just the number, in ₹)`,
     a: String(up ? n + n * p / 100 : n - n * p / 100), hint: `Find ${p}% of ${n} first (${n * p / 100}), then ${up ? 'add' : 'subtract'} it.` };
 }
 
@@ -450,7 +460,7 @@ function g8_roots(lv) {
   if (v === 2) { // square it
     const n = R.int(11, 32);
     return { q: `Find the square:  ${n}²   (just the number)`,
-      a: String(n * n), hint: `${n}² means ${n} × ${n}. Split it: (${n})² = (${n}0 + ${n % 10})² if that helps!` };
+      a: String(n * n), hint: `${n}² means ${n} × ${n} = ${n * n}.` };
   }
   if (v === 3) { // cube it
     const n = R.int(2, 10);
@@ -477,10 +487,10 @@ function g8_powers(lv) {
     return { q: `Evaluate: (${a}/${b})^−${n}   (answer like 3/4)`,
       a: fmtFrac(Math.pow(b, n), Math.pow(a, n)), hint: `Flip the fraction and make the power positive: (${b}/${a})^${n}.` };
   }
-  // standard form
-  const k = R.int(3, 7), d = R.int(11, 99) / 10;
-  return { q: `Write in standard form:  ${d} × 10^${k} = ?  (just the ordinary number)`,
-    a: String(d * Math.pow(10, k)), hint: `Move the decimal point ${k} places to the right.` };
+  // standard form -> ordinary number (integer math keeps the answer clean)
+  const m = R.int(11, 99), k = R.int(3, 7);
+  return { q: `Write as an ordinary number:  ${(m / 10).toFixed(1)} × 10^${k} = ?  (just the number)`,
+    a: String(m * Math.pow(10, k - 1)), hint: `Move the decimal point ${k} places to the right.` };
 }
 
 function g8_mensuration(lv) {
@@ -513,12 +523,12 @@ function g8_factor(lv) {
   }
   if (v === 1) { // common factor (MCQ)
     const k = R.pick([2, 3, 4, 5, 6]), a = R.int(2, 9), b = R.int(1, 9);
-    const correct = `${k}(x + ${b})`;
-    const distractors = [`${k}(x − ${b})`, `${k * a}(x + ${b})`, `x(${k * a} + ${k * b})`]
+    const correct = `${k}(${a}x + ${b})`;
+    const distractors = [`${k}(${a}x − ${b})`, `${a}(${k}x + ${b})`, `x(${k * a} + ${k * b})`]
       .filter(d => d !== correct);
     return { q: `Take out the common factor:  ${k * a}x + ${k * b}  = ?`,
       a: correct, choices: R.shuffle([...distractors.slice(0, 3), correct]),
-      hint: `What number divides BOTH ${k * a} and ${k * b}? Pull it outside the bracket.` };
+      hint: `Both terms share ${k}. Pull it outside the bracket: ${k}( … ) — divide each term by ${k}.` };
   }
   // common factor kx(ax + b) (MCQ)
   const k = R.pick([2, 3, 4, 5]), a = R.int(2, 6), b = R.int(1, 9);
@@ -576,4 +586,11 @@ function drawQuestion(gen, seen, level) {
     if (qd && qd.q && !seen.has(qd.q)) { seen.add(qd.q); return qd; }
   }
   return gen(level); // fallback even if repeated
+}
+
+/* Node (unit-test) support */
+if (typeof module !== 'undefined' && module.exports) {
+  const _m = { BANK, drawQuestion };
+  Object.values(BANK).forEach(topics => topics.forEach(t => { _m[t.gen.name] = t.gen; }));
+  module.exports = _m;
 }

@@ -351,3 +351,8 @@ const ART = {
     `, '0 0 320 240');
   }
 };
+
+/* Node (unit-test) support */
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = ART;
+}

@@ -1,4 +1,4 @@
-# 🏴‍☠️ Math Treasure Hunt
+# 🏴‍☠️ Math Treasure Hunt — CBSE Grades 5–8
 
 A fun pirate-themed **math game** that teaches CBSE Grade 5–8 topics through a
 treasure hunt across the seven seas. Kids pick their grade, sail from island to
@@ -47,6 +47,22 @@ Perfect for GitHub Pages.
    `https://<your-username>.github.io/math-treasure-hunt/`
 
 That's it — no build, no npm, no server.
+
+## 🧪 Running the tests
+
+The question generators are covered by a unit-test suite that **parses every
+generated question and independently recomputes the answer** (9,600+ questions
+per run), checks MCQ integrity, guarantees an island's 5 questions never
+repeat, and tests the answer-matching rules:
+
+```bash
+node tests/unit-tests.js
+```
+
+If you add or change a generator, add a matching verifier in the `VERIFIERS`
+map in `tests/unit-tests.js` — it re-derives the answer from the question text
+with independent arithmetic, so generator bugs (like a place value computed
+from the wrong digit) get caught automatically.
 
 ## 🖥️ Run locally
 

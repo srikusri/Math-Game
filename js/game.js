@@ -50,27 +50,7 @@ const Sfx = {
   }
 };
 
-/* ── answer checking ── */
-function normAns(s) {
-  s = String(s).trim().toLowerCase().replace(/\s+/g, '');
-  s = s.replace(/^(x|y)=/, '');
-  s = s.replace(/(sq\.?cm|sq\.?cm|cm2|cm³|cm3|sq\.?units?|cubiccm|cm|mm|km|m|kg|g|ml|l|₹|rs|°|deg|degrees?)$/u, '');
-  return s;
-}
-function toNum(s) {
-  if (s === '' || s === '-') return null;
-  if (/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
-  const m = s.match(/^(-?\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)$/);
-  if (m) { const d = parseFloat(m[2]); return d === 0 ? null : parseFloat(m[1]) / d; }
-  return null;
-}
-function sameAnswer(user, expected) {
-  const u = normAns(user), e = normAns(expected);
-  if (u === e) return true;
-  const uv = toNum(u), ev = toNum(e);
-  if (uv !== null && ev !== null) return Math.abs(uv - ev) < 0.01;
-  return false;
-}
+/* ── answer checking lives in answers.js (normAns / toNum / sameAnswer) ── */
 
 /* ── screen helpers ── */
 const $ = id => document.getElementById(id);

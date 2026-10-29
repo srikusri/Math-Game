@@ -57,3 +57,8 @@ function inFormat(n) {
   const rest = s.slice(0, -3);
   return rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + last3;
 }
+
+/* Node (unit-test) support */
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { R, gcd, reduceFrac, fmtFrac, lcm, distinctDigitsNumber, inFormat };
+}
